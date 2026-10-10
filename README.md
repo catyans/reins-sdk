@@ -48,7 +48,7 @@ print(outcome.result)
 
 `run_paid_call` requests the task's pinned configuration, reserves the upper bound, and calls your provider only if Reins admits the operation. It then records the actual charge. It never retries a paid call. If the provider response or charge is uncertain, the reservation stays visible for reconciliation. If settlement cannot be acknowledged, it raises `SettlementUnknown` with the request ID. Do not repeat the provider call to resolve that error.
 
-For a multi-step Agent, use `decision()`, `reserve()`, `settle()`, `uncertain()`, `progress()`, and `status()` directly. [Explicit-call example](examples/explicit_calls.py) shows the boundary. The [API guide](docs/API.md) describes request IDs, budget decisions and error handling. The SDK only controls calls you connect to it.
+For a multi-step Agent, use `decision()`, `reserve()`, `settle()`, `uncertain()`, `progress()`, and `status()` directly. [Explicit-call example](examples/explicit_calls.py) shows the boundary. To adapt an existing customer repository, install the [integration skill](docs/SKILL_INSTALL.md). The [API guide](docs/API.md) describes request IDs, budget decisions and error handling. The SDK only controls calls you connect to it.
 
 ## What is sent
 

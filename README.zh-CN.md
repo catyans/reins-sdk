@@ -47,7 +47,7 @@ print(outcome.result)
 
 `run_paid_call` 先读取任务选定的配置和是否继续的决策，再预留费用；只有获准后才会调用你原有的模型客户端，最后登记实际费用。它**不会自动重试**付费调用。若调用已经发生、但结算没有得到确认，会抛出带有请求 ID 的 `SettlementUnknown`；应核对这次调用，不能直接重新调用模型。
 
-多步骤 Agent 可以直接使用 `decision()`、`reserve()`、`settle()`、`uncertain()`、`progress()` 和 `status()`。详细边界见 [API 说明](docs/API.md)。只有接入 SDK 的调用会受到控制。
+多步骤 Agent 可以直接使用 `decision()`、`reserve()`、`settle()`、`uncertain()`、`progress()` 和 `status()`。详细边界见 [API 说明](docs/API.md)。要让编程助手适配现有客户代码，可安装[接入 Skill](docs/SKILL_INSTALL.md)。只有接入 SDK 的调用会受到控制。
 
 ## 数据边界
 
