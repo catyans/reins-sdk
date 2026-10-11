@@ -1,0 +1,33 @@
+import tempfile
+import unittest
+from pathlib import Path
+
+from reins_sdk.pair import create_code
+
+
+class PairCodeTests(unittest.TestCase):
+    def test_private_code_is_stable_and_not_overwritten(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "pair.token"
+            first = create_code(path)
+            self.assertGreaterEqual(len(first), 43)
+            self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+            self.assertEqual(first, create_code(path))
+
+    def test_public_or_symlinked_file_is_rejected(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "pair.token"
+            create_code(path)
+            path.chmod(0o644)
+            with self.assertRaises(ValueError):
+                create_code(path)
+            path.unlink()
+            target = Path(folder) / "target"
+            target.write_text("secret")
+            path.symlink_to(target)
+            with self.assertRaises(ValueError):
+                create_code(path)
+
+
+if __name__ == "__main__":
+    unittest.main()

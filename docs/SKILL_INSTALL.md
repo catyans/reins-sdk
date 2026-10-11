@@ -40,3 +40,21 @@ In the customer repository, ask your coding assistant:
 For Claude Code, invoke `/reins-integrate`. Review the patch, provide the workflow ID at runtime, and run the focused tests before enabling it on live traffic. The assistant should leave `REINS_INTEGRATION.md` explaining what it changed and how to remove the integration. / Claude Code 使用 `/reins-integrate`。上线前检查补丁、在运行时提供任务 ID，并执行相关测试；助手会留下 `REINS_INTEGRATION.md` 说明改动与回退办法。
 
 The skill does not grant access to the private Reins service repository. Only the customer-side SDK and the chosen calls in their own application are involved. / Skill 不授予 Reins 私有服务端仓库权限。
+
+## Demo pairing / 演示配对
+
+After the Reins operator creates a demonstration task and gives you its task ID, run in the customer backend environment:
+
+```bash
+python -m reins_sdk.pair YOUR_TASK_ID
+```
+
+The command generates a strong code and saves it in `~/.config/reins/demo-worker.token` with file permissions 0600. Paste the displayed code into **Reins Settings > Pair a customer SDK** together with the same task ID. The server then accepts this code only for that task. Check the connection with:
+
+```bash
+python -m reins_sdk.pair YOUR_TASK_ID --check
+```
+
+Construct the SDK with `ReinsClient("https://47.245.114.167:8444/api", token_file="~/.config/reins/demo-worker.token")`. The IP is a demo default; use `--base-url` and your own configuration when the endpoint moves. The operator can revoke the pairing on the Settings page.
+
+在 Reins 已创建演示任务后，客户运行第一条命令生成配对码；我们在 Settings 页面输入配对码和相同任务 ID，客户再运行 `--check` 验证。码保存在客户本机的私有文件中，只能访问指定任务，不要提交到 Git。

@@ -87,7 +87,7 @@ class ReinsClient:
             raise ValueError("Use an HTTPS origin with /api or /v1, or HTTP loopback for tests")
         if (token is None) == (token_file is None):
             raise ValueError("Supply exactly one of token or token_file")
-        secret = token if token is not None else Path(token_file).read_text().strip()
+        secret = token if token is not None else Path(token_file).expanduser().read_text().strip()
         if not secret or len(secret) < 32 or "\n" in secret or "\r" in secret:
             raise ValueError("A valid worker token is required")
         if timeout <= 0:
