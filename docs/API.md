@@ -10,6 +10,8 @@ The SDK is a thin client. Its request bodies match the hosted worker API; it doe
 | `uncertain(request_id)` | Keep an unknown provider charge visible | `status` |
 | `status(workflow_id)` | Read the saved task record | `workflows` |
 | `progress(task_id, stage, completed, total)` | Report measured task progress | `status` |
+| `pairing()` | Check the customer account connected to a demo pairing | `customer_id`, `deployment_id` |
+| `start_run(run_key=None)` | Start a new run from the paired customer's approved deployment | `workflow_id` |
 
 Use a unique, stable `request_id` for each actual provider call. If an HTTP response is lost, **do not create a new request ID and dispatch the provider call again**. Reins may already hold a reservation. Check the task record and reconcile the original request.
 
@@ -17,4 +19,4 @@ Use a unique, stable `request_id` for each actual provider call. If an HTTP resp
 
 If you provide `Charge(validated=..., validation_name=...)`, Reins records the named business check. A failed named check can cause the hosted runtime to choose its qualified fallback or stop later calls. `success` describes the provider operation; it is not a substitute for the business check.
 
-A Reins operator creates a task and reviews a deployment before the worker calls these endpoints. The worker token cannot change operator settings. The browser pairing token is for the dashboard only. A single shared pilot workspace is **not** a production multi-customer tenant setup.
+For the isolated paired demo, a Reins operator approves the deployment and performs the first pairing. The worker then calls `start_run()` for each business run; no task ID needs to be entered by a person. Each run still receives a separate internal ID so its budget, outcome and replay remain independent. If the start response is lost, pass the same `run_key` on retry to avoid a duplicate task. The worker token cannot change operator settings. The browser pairing token is for the dashboard only. A single shared pilot workspace is **not** a production multi-customer tenant setup.

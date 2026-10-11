@@ -19,6 +19,17 @@ class PairCodeTests(unittest.TestCase):
             self.assertTrue(path.exists())
             self.assertEqual(path.stat().st_mode & 0o777, 0o600)
 
+    def test_cli_can_check_customer_without_task_id(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "pair.token"
+            create_code(path)
+            with patch("sys.argv", ["reins_sdk.pair", "--output", str(path), "--check"]):
+                with patch("reins_sdk.pair.ReinsClient") as client:
+                    client.return_value.pairing.return_value = {"customer_id": "demo-customer"}
+                    with redirect_stdout(StringIO()) as output:
+                        main()
+            self.assertIn("Connected to Reins customer: demo-customer", output.getvalue())
+
     def test_private_code_is_stable_and_not_overwritten(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "pair.token"

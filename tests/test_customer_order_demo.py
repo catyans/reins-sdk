@@ -17,7 +17,8 @@ TOKEN = "t" * 48
 
 class DemoHandler(BaseHTTPRequestHandler):
     events = []
-    state = "running"
+    states = {}
+    run_keys = {}
 
     def log_message(self, *_args):
         pass
@@ -27,9 +28,24 @@ class DemoHandler(BaseHTTPRequestHandler):
         self.events.append((self.path, body))
         if self.headers.get("Authorization") != "Bearer " + TOKEN:
             return self.reply(403, {"error": "Not paired"})
+        if self.path == "/api/worker-pair/me":
+            return self.reply(200, {"customer_id": "demo-customer"})
+        if self.path == "/api/worker-pair/start":
+            run_key = body["run_key"]
+            task_id = self.run_keys.setdefault(run_key, "auto-" + str(len(self.run_keys) + 1))
+            self.states.setdefault(task_id, "running")
+            return self.reply(200, {"workflow_id": task_id})
         if self.path == "/api/status":
             return self.reply(
-                200, {"workflows": [{"workflow_id": "demo-task", "state": self.state}]}
+                200,
+                {
+                    "workflows": [
+                        {
+                            "workflow_id": body["workflow_id"],
+                            "state": self.states.get(body["workflow_id"], "running"),
+                        }
+                    ]
+                },
             )
         if self.path == "/api/console/runtime/decision":
             return self.reply(
@@ -39,7 +55,7 @@ class DemoHandler(BaseHTTPRequestHandler):
         if self.path == "/api/reserve":
             return self.reply(200, {"decision": "continue"})
         if self.path == "/api/transition":
-            self.__class__.state = "completed"
+            self.states[body["workflow_id"]] = "completed"
         return self.reply(200, {"status": "recorded"})
 
     def reply(self, status, payload):
@@ -57,7 +73,8 @@ class CustomerOrderDemoTests(unittest.TestCase):
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
         DemoHandler.events = []
-        DemoHandler.state = "running"
+        DemoHandler.states = {}
+        DemoHandler.run_keys = {}
         try:
             with tempfile.TemporaryDirectory() as folder:
                 token_file = Path(folder) / "worker.token"
@@ -108,6 +125,46 @@ class CustomerOrderDemoTests(unittest.TestCase):
                 )
                 self.assertEqual(settlement["actual_cost"], "0")
                 self.assertTrue(settlement["validated"])
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=3)
+
+    def test_repeated_runs_need_no_task_id(self):
+        server = ThreadingHTTPServer(("127.0.0.1", 0), DemoHandler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        DemoHandler.events = []
+        DemoHandler.states = {}
+        DemoHandler.run_keys = {}
+        try:
+            with tempfile.TemporaryDirectory() as folder:
+                token_file = Path(folder) / "worker.token"
+                token_file.write_text(TOKEN)
+                env = {**os.environ, "PYTHONPATH": str(ROOT / "src")}
+                command = [
+                    sys.executable,
+                    str(DEMO / "with_reins.py"),
+                    "--base-url",
+                    f"http://127.0.0.1:{server.server_port}/api",
+                    "--token-file",
+                    str(token_file),
+                ]
+                paired = subprocess.run(
+                    command, env=env, check=True, capture_output=True, text=True
+                )
+                self.assertIn("Connected to Reins customer: demo-customer", paired.stdout)
+                for task_id in ("auto-1", "auto-2"):
+                    completed = subprocess.run(
+                        command + ["--run"], env=env, check=True, capture_output=True, text=True
+                    )
+                    self.assertIn("New run created: " + task_id, completed.stdout)
+                    self.assertIn("Final task state: completed", completed.stdout)
+                self.assertEqual(
+                    [path for path, _ in DemoHandler.events].count("/api/worker-pair/start"),
+                    2,
+                )
+                self.assertEqual(set(DemoHandler.states.values()), {"completed"})
         finally:
             server.shutdown()
             server.server_close()

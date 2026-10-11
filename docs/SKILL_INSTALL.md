@@ -49,12 +49,12 @@ After installing the SDK, generate a code in the customer backend environment:
 python -m reins_sdk.pair
 ```
 
-The command generates a strong code and saves it in `~/.config/reins/demo-worker.token` with file permissions 0600. The Reins operator creates a Hosted task, then pastes the displayed code into **Reins Settings > Pair a customer SDK** with that task ID. This first task identifies the customer account. The same code then works for new Hosted tasks assigned to that customer; no second pairing is needed. Check each task's connection with:
+The command generates a strong code and saves it in `~/.config/reins/demo-worker.token` with file permissions 0600. The Reins operator creates a Hosted task once, then pastes the displayed code into **Reins Settings > Pair a customer SDK** with that task ID. This first task identifies the customer account and approved deployment. Check the pairing with:
 
 ```bash
-python -m reins_sdk.pair YOUR_TASK_ID --check
+python -m reins_sdk.pair --check
 ```
 
-Construct the SDK with `ReinsClient("https://47.245.114.167:8444/api", token_file="~/.config/reins/demo-worker.token")`. The IP is a demo default; use `--base-url` and your own configuration when the endpoint moves. The operator must create each new task under the same customer account. They can revoke the customer pairing on the Settings page.
+Construct the SDK with `ReinsClient("https://47.245.114.167:8444/api", token_file="~/.config/reins/demo-worker.token")`. The IP is a demo default; use `--base-url` and your own configuration when the endpoint moves. For each new run, call `client.start_run()` and use its returned `workflow_id` for the SDK's decision, reservation and settlement calls. The SDK generates a new internal run ID automatically; the customer does not enter another task ID or pair again. If a start response is lost, retry with the **same** `run_key` rather than creating a second task. The operator can revoke the customer pairing on the Settings page.
 
-客户先运行第一条命令生成配对码；我们创建 Hosted task 后，在 Settings 页面输入配对码和任务 ID，客户再运行 `--check` 验证。第一次任务决定配对所属的客户账号。同一账号下的新任务沿用本机配对码，不用再次配对；每个新任务仍需要我们创建并提供 Task ID。不要将码提交到 Git。
+客户先运行第一条命令生成配对码；我们只在首次配对时创建 Hosted task，并在 Settings 页面输入配对码和任务 ID。此后运行 `--check` 即可验证账号连接。每次执行由 `client.start_run()` 在服务端创建独立的运行记录，自动返回内部 ID；客户无需再次配对或手动输入 Task ID。不要将码提交到 Git。

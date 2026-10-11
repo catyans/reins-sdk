@@ -43,6 +43,10 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_json(503, {"error": "temporarily unavailable"})
         if self.path == "/api/status":
             return self.send_json(200, {"workflows": [{"id": body["workflow_id"]}]})
+        if self.path == "/api/worker-pair/me":
+            return self.send_json(200, {"customer_id": "demo-customer", "pairing_id": "demo-pair"})
+        if self.path == "/api/worker-pair/start":
+            return self.send_json(200, {"workflow_id": "run-" + body["run_key"]})
         return self.send_json(200, {"status": "recorded"})
 
     def send_json(self, status, body):
@@ -160,6 +164,12 @@ class ClientTests(unittest.TestCase):
 
     def test_status(self):
         self.assertEqual(self.client.status("job-1")["workflows"][0]["id"], "job-1")
+
+    def test_pairing_and_start_run(self):
+        self.assertEqual(self.client.pairing()["customer_id"], "demo-customer")
+        first = self.client.start_run(run_key="a" * 32)["workflow_id"]
+        self.assertEqual(first, "run-" + "a" * 32)
+        self.assertEqual(Handler.requests[-1][1], {"run_key": "a" * 32})
 
     def test_tls_and_credentials_required(self):
         with self.assertRaises(ValueError):

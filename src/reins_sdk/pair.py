@@ -33,25 +33,25 @@ def create_code(path: Path) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "task_id", nargs="?", help="Assigned demonstration task ID (required for --check)"
-    )
+    parser.add_argument("task_id", nargs="?", help="Optional specific task ID to check")
     parser.add_argument("--output", type=Path, default=DEFAULT_TOKEN_FILE)
     parser.add_argument("--base-url", default=DEFAULT_DEMO_API_URL)
     parser.add_argument(
         "--check", action="store_true", help="Check whether the server paired this code"
     )
     args = parser.parse_args()
-    if args.check and not args.task_id:
-        parser.error("Provide the assigned task ID with --check")
     try:
         code = create_code(args.output)
         if args.check:
             client = ReinsClient(args.base_url, token=code)
-            result = client.status(args.task_id)
-            if len(result.get("workflows", [])) != 1:
-                raise ValueError("Pairing did not return the requested task")
-            print("Connected to Reins task:", args.task_id)
+            if args.task_id:
+                result = client.status(args.task_id)
+                if len(result.get("workflows", [])) != 1:
+                    raise ValueError("Pairing did not return the requested task")
+                print("Connected to Reins task:", args.task_id)
+            else:
+                result = client.pairing()
+                print("Connected to Reins customer:", result["customer_id"])
             return
         if args.task_id:
             print("Task ID:", args.task_id)
@@ -60,8 +60,8 @@ def main():
         print("Pairing code (paste into Reins Settings > Pair a customer SDK):")
         print(code)
         print("Saved privately at:", args.output.expanduser())
-        print("After approval, run: python -m reins_sdk.pair TASK_ID --check")
-        print("New tasks for the same customer reuse this code without pairing again.")
+        print("After approval, run: python -m reins_sdk.pair --check")
+        print("Each new run receives an internal task ID automatically; no new pairing is needed.")
     except (OSError, ValueError, ReinsError) as exc:
         parser.exit(1, str(exc) + "\n")
 

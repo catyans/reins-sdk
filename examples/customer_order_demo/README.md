@@ -11,12 +11,12 @@ PYTHONPATH=src python3 examples/customer_order_demo/before_reins.py
 PYTHONPATH=src python3 -m reins_sdk.pair
 ```
 
-Give the displayed code to the Reins operator. They create a Hosted task and enter its ID and this code at **Settings → Pair a customer SDK** on the [isolated pilot site](https://47.245.114.167:8444/). The operator gives you the task ID. Then run:
+Give the displayed code to the Reins operator. For the first pairing only, they create a Hosted task and enter its ID and this code at **Settings → Pair a customer SDK** on the [isolated pilot site](https://47.245.114.167:8444/). After that, you do not need to enter or request a task ID. Run:
 
 ```bash
-PYTHONPATH=src python3 -m reins_sdk.pair YOUR_TASK_ID --check
-PYTHONPATH=src python3 examples/customer_order_demo/with_reins.py YOUR_TASK_ID
-PYTHONPATH=src python3 examples/customer_order_demo/with_reins.py YOUR_TASK_ID --run
+PYTHONPATH=src python3 -m reins_sdk.pair --check
+PYTHONPATH=src python3 examples/customer_order_demo/with_reins.py
+PYTHONPATH=src python3 examples/customer_order_demo/with_reins.py --run
 ```
 
-The check-only command reads the task without changing it. `--run` records one local operation and finishes the task. For another full run, the operator creates a new Hosted task with the **same customer account** and gives you its ID. Reuse the existing local code; do not pair again. The code remains in `~/.config/reins/demo-worker.token` with mode 0600 and must not be committed. The Reins operator can revoke it in Settings.
+The first two commands verify the customer pairing without creating a run. Each `--run` starts a fresh internal task, records one local operation and finishes it. Run the same command again for another task; Reins creates the new task ID and prints a direct link to its record. The pairing code remains in `~/.config/reins/demo-worker.token` with mode 0600 and must not be committed. The Reins operator can revoke it in Settings.

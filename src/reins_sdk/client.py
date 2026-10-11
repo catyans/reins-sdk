@@ -198,6 +198,14 @@ class ReinsClient:
     def status(self, workflow_id: str):
         return self.post("status", {"workflow_id": workflow_id})
 
+    def pairing(self):
+        """Read the customer account connected to this demo pairing code."""
+        return self.post("worker-pair/me", {})
+
+    def start_run(self, *, run_key: str | None = None):
+        """Create one hosted run for the paired customer; reuse run_key after an uncertain reply."""
+        return self.post("worker-pair/start", {"run_key": run_key or uuid4().hex})
+
     def progress(self, task_id: str, stage: str, completed: int, total: int):
         return self.post(
             "progress",
