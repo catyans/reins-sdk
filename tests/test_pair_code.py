@@ -1,11 +1,24 @@
 import tempfile
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
+from unittest.mock import patch
 
-from reins_sdk.pair import create_code
+from reins_sdk.pair import create_code, main
 
 
 class PairCodeTests(unittest.TestCase):
+    def test_cli_can_generate_before_task_is_assigned(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "pair.token"
+            with patch("sys.argv", ["reins_sdk.pair", "--output", str(path)]):
+                with redirect_stdout(StringIO()) as output:
+                    main()
+            self.assertIn("Reins operator will assign", output.getvalue())
+            self.assertTrue(path.exists())
+            self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+
     def test_private_code_is_stable_and_not_overwritten(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "pair.token"

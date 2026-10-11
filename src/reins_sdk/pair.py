@@ -33,13 +33,17 @@ def create_code(path: Path) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("task_id", help="Existing demonstration task ID from Reins")
+    parser.add_argument(
+        "task_id", nargs="?", help="Assigned demonstration task ID (required for --check)"
+    )
     parser.add_argument("--output", type=Path, default=DEFAULT_TOKEN_FILE)
     parser.add_argument("--base-url", default=DEFAULT_DEMO_API_URL)
     parser.add_argument(
         "--check", action="store_true", help="Check whether the server paired this code"
     )
     args = parser.parse_args()
+    if args.check and not args.task_id:
+        parser.error("Provide the assigned task ID with --check")
     try:
         code = create_code(args.output)
         if args.check:
@@ -49,11 +53,14 @@ def main():
                 raise ValueError("Pairing did not return the requested task")
             print("Connected to Reins task:", args.task_id)
             return
-        print("Task ID:", args.task_id)
+        if args.task_id:
+            print("Task ID:", args.task_id)
+        else:
+            print("The Reins operator will assign this code to a Hosted task.")
         print("Pairing code (paste into Reins Settings > Pair a customer SDK):")
         print(code)
         print("Saved privately at:", args.output.expanduser())
-        print("After approval, run this command again with --check.")
+        print("After approval, run: python -m reins_sdk.pair TASK_ID --check")
     except (OSError, ValueError, ReinsError) as exc:
         parser.exit(1, str(exc) + "\n")
 

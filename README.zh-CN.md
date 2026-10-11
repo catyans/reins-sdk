@@ -12,7 +12,7 @@
 python -m pip install git+https://github.com/catyans/reins-sdk.git
 ```
 
-独立演示时，我们先提供已创建的任务 ID；客户运行 `python -m reins_sdk.pair TASK_ID` 生成私有配对码，然后在 Reins Settings 页面输入。步骤见 [Skill 安装与配对说明](docs/SKILL_INSTALL.md)。其他托管工作区仍由我们私下提供 worker token 和 HTTPS API 地址。凭证只放在客户后端，不放进浏览器、移动端或代码仓库。网页登录配对码不能当作 worker token。
+独立演示时，客户运行 `python -m reins_sdk.pair` 生成私有配对码；我们创建 Hosted task 后，在 Reins Settings 页面把码与任务绑定。步骤见 [Skill 安装与配对说明](docs/SKILL_INSTALL.md)。其他托管工作区仍由我们私下提供 worker token 和 HTTPS API 地址。凭证只放在客户后端，不放进浏览器、移动端或代码仓库。网页登录配对码不能当作 worker token。
 
 托管 API 地址可能以 `/api` 或 `/v1` 结尾，例如 `https://reins.example.com/api`。请使用交付给你的工作区地址。
 

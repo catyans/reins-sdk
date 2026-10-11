@@ -12,7 +12,7 @@ Python 3.10+; the SDK has no runtime dependencies.
 python -m pip install git+https://github.com/catyans/reins-sdk.git
 ```
 
-For the isolated demo, your Reins contact supplies an existing task ID; run `python -m reins_sdk.pair TASK_ID` to generate a private code, then paste it into the Reins Settings pairing form. See the [skill installation and pairing guide](docs/SKILL_INSTALL.md). For other hosted workspaces, your Reins contact supplies a worker token and HTTPS API base URL privately. Keep the credential in your backend secret store, not JavaScript, a mobile app, or a source file. The browser pairing token is different and cannot be used here.
+For the isolated demo, run `python -m reins_sdk.pair` to generate a private code, then give it to the Reins operator to bind to a Hosted task in Settings. See the [skill installation and pairing guide](docs/SKILL_INSTALL.md). For other hosted workspaces, your Reins contact supplies a worker token and HTTPS API base URL privately. Keep the credential in your backend secret store, not JavaScript, a mobile app, or a source file. The browser pairing token is different and cannot be used here.
 
 Your hosted API base may end in `/api` or `/v1` (for example, `https://reins.example.com/api`). Use the exact URL supplied for your workspace. A task and its approved configuration must be prepared on the Reins side before the worker can run it.
 

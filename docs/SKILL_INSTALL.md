@@ -43,13 +43,13 @@ The skill does not grant access to the private Reins service repository. Only th
 
 ## Demo pairing / 演示配对
 
-After the Reins operator creates a demonstration task and gives you its task ID, run in the customer backend environment:
+After installing the SDK, generate a code in the customer backend environment:
 
 ```bash
-python -m reins_sdk.pair YOUR_TASK_ID
+python -m reins_sdk.pair
 ```
 
-The command generates a strong code and saves it in `~/.config/reins/demo-worker.token` with file permissions 0600. Paste the displayed code into **Reins Settings > Pair a customer SDK** together with the same task ID. The server then accepts this code only for that task. Check the connection with:
+The command generates a strong code and saves it in `~/.config/reins/demo-worker.token` with file permissions 0600. The Reins operator creates a Hosted task, then pastes the displayed code into **Reins Settings > Pair a customer SDK** with that task ID. The server then accepts this code only for that task. Check the connection with:
 
 ```bash
 python -m reins_sdk.pair YOUR_TASK_ID --check
@@ -57,4 +57,4 @@ python -m reins_sdk.pair YOUR_TASK_ID --check
 
 Construct the SDK with `ReinsClient("https://47.245.114.167:8444/api", token_file="~/.config/reins/demo-worker.token")`. The IP is a demo default; use `--base-url` and your own configuration when the endpoint moves. The operator can revoke the pairing on the Settings page.
 
-在 Reins 已创建演示任务后，客户运行第一条命令生成配对码；我们在 Settings 页面输入配对码和相同任务 ID，客户再运行 `--check` 验证。码保存在客户本机的私有文件中，只能访问指定任务，不要提交到 Git。
+客户先运行第一条命令生成配对码；我们创建 Hosted task 后，在 Settings 页面输入配对码和任务 ID，客户再运行 `--check` 验证。码保存在客户本机的私有文件中，只能访问指定任务，不要提交到 Git。
