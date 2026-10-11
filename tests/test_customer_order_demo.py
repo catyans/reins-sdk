@@ -29,7 +29,9 @@ class DemoHandler(BaseHTTPRequestHandler):
         if self.headers.get("Authorization") != "Bearer " + TOKEN:
             return self.reply(403, {"error": "Not paired"})
         if self.path == "/api/status":
-            return self.reply(200, {"workflows": [{"id": "demo-task", "state": self.state}]})
+            return self.reply(
+                200, {"workflows": [{"workflow_id": "demo-task", "state": self.state}]}
+            )
         if self.path == "/api/console/runtime/decision":
             return self.reply(
                 200,

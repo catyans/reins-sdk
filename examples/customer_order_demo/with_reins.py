@@ -30,7 +30,7 @@ def main() -> None:
 
     status = client.status(args.task_id)
     workflow = status["workflows"][0]
-    print("Connected to Reins task:", workflow["id"])
+    print("Connected to Reins task:", workflow["workflow_id"])
     print("Task state:", workflow["state"])
     if not args.run:
         print("Connection verified. Add --run to execute the local order review.")
