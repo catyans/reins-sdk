@@ -15,7 +15,7 @@ class PairCodeTests(unittest.TestCase):
             with patch("sys.argv", ["reins_sdk.pair", "--output", str(path)]):
                 with redirect_stdout(StringIO()) as output:
                     main()
-            self.assertIn("Reins operator will assign", output.getvalue())
+            self.assertIn("Reins operator will pair this code", output.getvalue())
             self.assertTrue(path.exists())
             self.assertEqual(path.stat().st_mode & 0o777, 0o600)
 

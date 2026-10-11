@@ -10,7 +10,6 @@ import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 DEMO = ROOT / "examples/customer_order_demo"
 TOKEN = "t" * 48
@@ -104,7 +103,9 @@ class CustomerOrderDemoTests(unittest.TestCase):
                         "/api/status",
                     ],
                 )
-                settlement = next(body for path, body in DemoHandler.events if path == "/api/settle")
+                settlement = next(
+                    body for path, body in DemoHandler.events if path == "/api/settle"
+                )
                 self.assertEqual(settlement["actual_cost"], "0")
                 self.assertTrue(settlement["validated"])
         finally:

@@ -19,4 +19,4 @@ PYTHONPATH=src python3 examples/customer_order_demo/with_reins.py YOUR_TASK_ID
 PYTHONPATH=src python3 examples/customer_order_demo/with_reins.py YOUR_TASK_ID --run
 ```
 
-The check-only command reads the task without changing it. `--run` records one local operation and finishes the task; use a new Hosted task for another full run. The pairing code remains in `~/.config/reins/demo-worker.token` with mode 0600 and must not be committed. The Reins operator can revoke it in Settings.
+The check-only command reads the task without changing it. `--run` records one local operation and finishes the task. For another full run, the operator creates a new Hosted task with the **same customer account** and gives you its ID. Reuse the existing local code; do not pair again. The code remains in `~/.config/reins/demo-worker.token` with mode 0600 and must not be committed. The Reins operator can revoke it in Settings.

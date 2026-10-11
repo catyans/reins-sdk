@@ -11,9 +11,9 @@ import argparse
 import json
 from pathlib import Path
 
-from reins_sdk import Charge, ReinsClient
-
 from business import review_orders
+
+from reins_sdk import Charge, ReinsClient
 
 API_URL = "https://47.245.114.167:8444/api"
 TOKEN_FILE = Path.home() / ".config/reins/demo-worker.token"

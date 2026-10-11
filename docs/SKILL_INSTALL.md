@@ -49,12 +49,12 @@ After installing the SDK, generate a code in the customer backend environment:
 python -m reins_sdk.pair
 ```
 
-The command generates a strong code and saves it in `~/.config/reins/demo-worker.token` with file permissions 0600. The Reins operator creates a Hosted task, then pastes the displayed code into **Reins Settings > Pair a customer SDK** with that task ID. The server then accepts this code only for that task. Check the connection with:
+The command generates a strong code and saves it in `~/.config/reins/demo-worker.token` with file permissions 0600. The Reins operator creates a Hosted task, then pastes the displayed code into **Reins Settings > Pair a customer SDK** with that task ID. This first task identifies the customer account. The same code then works for new Hosted tasks assigned to that customer; no second pairing is needed. Check each task's connection with:
 
 ```bash
 python -m reins_sdk.pair YOUR_TASK_ID --check
 ```
 
-Construct the SDK with `ReinsClient("https://47.245.114.167:8444/api", token_file="~/.config/reins/demo-worker.token")`. The IP is a demo default; use `--base-url` and your own configuration when the endpoint moves. The operator can revoke the pairing on the Settings page.
+Construct the SDK with `ReinsClient("https://47.245.114.167:8444/api", token_file="~/.config/reins/demo-worker.token")`. The IP is a demo default; use `--base-url` and your own configuration when the endpoint moves. The operator must create each new task under the same customer account. They can revoke the customer pairing on the Settings page.
 
-客户先运行第一条命令生成配对码；我们创建 Hosted task 后，在 Settings 页面输入配对码和任务 ID，客户再运行 `--check` 验证。码保存在客户本机的私有文件中，只能访问指定任务，不要提交到 Git。
+客户先运行第一条命令生成配对码；我们创建 Hosted task 后，在 Settings 页面输入配对码和任务 ID，客户再运行 `--check` 验证。第一次任务决定配对所属的客户账号。同一账号下的新任务沿用本机配对码，不用再次配对；每个新任务仍需要我们创建并提供 Task ID。不要将码提交到 Git。

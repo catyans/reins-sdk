@@ -56,11 +56,12 @@ def main():
         if args.task_id:
             print("Task ID:", args.task_id)
         else:
-            print("The Reins operator will assign this code to a Hosted task.")
+            print("The Reins operator will pair this code using a Hosted task.")
         print("Pairing code (paste into Reins Settings > Pair a customer SDK):")
         print(code)
         print("Saved privately at:", args.output.expanduser())
         print("After approval, run: python -m reins_sdk.pair TASK_ID --check")
+        print("New tasks for the same customer reuse this code without pairing again.")
     except (OSError, ValueError, ReinsError) as exc:
         parser.exit(1, str(exc) + "\n")
 
