@@ -2,7 +2,33 @@
 
 [简体中文](README.zh-CN.md)
 
-A small, backend-only client for the hosted Reins worker API. It lets your existing Agent ask whether a task may continue, reserve a maximum cost before a paid model call, report the actual charge afterward, and inspect the task record. **Your model provider calls and API keys remain in your application.** This repository contains no Reins server, policy engine, database, dashboard, or deployment credentials.
+A small Python client for the hosted Reins worker API and the local Reins Mac workspace. It lets your existing Agent reserve a maximum cost before a paid model call, report the actual charge afterward, and inspect the task record. **Your model provider calls and API keys remain in your application.** This repository contains no hosted Reins server or deployment credentials.
+
+## Connect a Python Agent to Reins Mac
+
+The local client needs no account, pairing code or background server. Install the SDK on the same Mac as Reins, then wrap paid calls. The app's **Programs** page reads the local ledger every ten seconds.
+
+```python
+from reins_sdk import Charge, LocalReinsClient
+
+reins = LocalReinsClient()
+task = reins.start_task(workflow="company-research", budget="0.50",
+                        wrapup_reserve="0.05", max_operations=20)
+
+def call_model():
+    response = your_existing_model_call()
+    return Charge(result=response.text, actual_cost=response.cost_usd,
+                  usage={"input_tokens": response.input_tokens,
+                         "output_tokens": response.output_tokens})
+
+answer = reins.run_paid_call(task_id=task, model="your-model", max_cost="0.10",
+                             operation_key="research-company", execute=call_model)
+reins.finish_task(task, accepted=your_acceptance_check(answer.result))
+```
+
+Use a fresh task ID for each run. The SDK reserves the stated upper bound atomically before invoking your provider. If the limit is reached, `AdmissionDenied` prevents the call. `phase="wrapup"` lets a final call use the amount held back for delivery. `operation_key` prevents an accidental repeat within one task. `max_operations` bounds loops. An uncertain provider charge stays reserved until reconciled with `settle()`; the SDK never repeats a paid call automatically. Only calls you instrument are controlled.
+
+The Mac app shows confirmed spend, outstanding reservations, denials, accepted results and cost per accepted task. For an evidence-backed savings comparison, run the same workflow twice with the same `case_id` and `variant="baseline"` or `"candidate"`. A savings figure appears only when both tasks finish, pass acceptance, and all charges settle; an estimate of blocked spending is never counted as savings. The ledger stores task metadata, model name, token counts, acceptance and costs, but no prompts, results or provider keys. See [local integration example](examples/local_mac_demo.py).
 
 ## Install
 

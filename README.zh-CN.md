@@ -2,7 +2,33 @@
 
 [English](README.md)
 
-这是给客户后端使用的轻量客户端，用于接入托管版 Reins：在付费模型调用前获取运行决策和费用预留，调用后记录实际费用，并查询任务状态。**Agent、模型调用和提供商密钥都留在你的应用中。**本仓库不包含 Reins 服务端、策略引擎、数据库、网页或部署凭证。
+这是给现有 Agent 程序使用的轻量客户端，可接入托管版 Reins，也可连接同一台 Mac 上的 Reins 应用。在付费模型调用前预留费用，调用后记录实际费用和验收结果。**Agent、模型调用和提供商密钥都留在你的应用中。**本仓库不包含托管服务端或部署凭证。
+
+## 接入 Reins Mac 应用
+
+在运行 Agent 的同一台 Mac 上安装 SDK，不需要账号、配对码或额外启动服务。应用的 **Programs** 页面每十秒读取一次本地任务记录。
+
+```python
+from reins_sdk import Charge, LocalReinsClient
+
+reins = LocalReinsClient()
+task = reins.start_task(workflow="资料核查", budget="0.50",
+                        wrapup_reserve="0.05", max_operations=20)
+
+def call_model():
+    response = your_existing_model_call()
+    return Charge(result=response.text, actual_cost=response.cost_usd,
+                  usage={"input_tokens": response.input_tokens,
+                         "output_tokens": response.output_tokens})
+
+answer = reins.run_paid_call(task_id=task, model="your-model", max_cost="0.10",
+                             operation_key="核查第一份资料", execute=call_model)
+reins.finish_task(task, accepted=your_acceptance_check(answer.result))
+```
+
+每次运行新建一个 task；SDK 在付费调用前原子化预留上限，预算不足时抛出 `AdmissionDenied`，不会调用模型。`wrapup_reserve` 留出收尾额度，收尾操作指定 `phase="wrapup"`；`operation_key` 防止同一任务的重复步骤，`max_operations` 限制循环。费用不明的调用继续占用预算，直至通过 `settle()` 核实；SDK 不会自动重复付费调用。只有接入 SDK 的调用才受控制。
+
+Mac 页面分别显示已确认支出、未结算预留、拒绝的调用、合格交付数量及每份合格成果的成本。要比较节省效果，为同一工作流的两次运行设置相同 `case_id`，并分别标记 `variant="baseline"` 和 `"candidate"`。只有两次都完成、验收通过且费用全部结算，才显示节省金额；拦截的潜在花费不会算成已节省。账本只存任务元数据、模型名称、token、费用和验收状态，不存 prompt、结果正文或密钥。可运行 [本地示例](examples/local_mac_demo.py)。
 
 ## 安装
 

@@ -10,6 +10,7 @@ from .client import (
     ReinsUnavailable,
     SettlementUnknown,
 )
+from .local import LocalReinsClient
 
 __all__ = [
     "AdmissionDenied",
@@ -20,4 +21,5 @@ __all__ = [
     "ReinsRejected",
     "ReinsUnavailable",
     "SettlementUnknown",
+    "LocalReinsClient",
 ]
